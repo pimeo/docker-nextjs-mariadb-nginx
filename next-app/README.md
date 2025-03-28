@@ -8,8 +8,8 @@
     - [Pre-installed packages:](#pre-installed-packages)
   - [Start docker compose services](#start-docker-compose-services)
       - [Development server](#development-server)
-      - [Production server](#production-server)
-    - [How to start project locally](#how-to-start-project-locally)
+  - [Deployment](#deployment)
+  - [How to start develop locally](#how-to-start-develop-locally)
   - [Learn More](#learn-more)
 
 
@@ -76,16 +76,18 @@ Access to the project via `http://localhost:3000` (application) or `http://local
 
 You can edit the codebase and will see the results without refreshing.
 
-#### Production server
+## Deployment
 
 ```sh
-docker compose down ## Required because we need to destroy entierely services
-docker compose -f docker-compose.prod.yml up --build --no-cache
+docker compose down ## Required because we need to destroy entirely services
+# docker compose -f docker-compose.prod.yml up --build
+docker compose -f docker-compose.prod.yml build --no-cache
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 Access to the project via `http://localhost` (nginx proxy pass server)
 
-### How to start project locally
+## How to start develop locally
 
 First, run the development server:
 
