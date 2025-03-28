@@ -1,6 +1,6 @@
 services:
   # NextJS application
-  NEXT_APP:
+  next_app:
     container_name: ${COMPOSE_PROJECT_NAME}_next_app
     build:
       context: ./next-app
@@ -15,14 +15,15 @@ services:
     volumes:
       - ${NEXT_APP_DATA_DIR:-./next-app}/src:/app/src
       - ${NEXT_APP_DATA_DIR:-./next-app}/public:/app/public
+      - ${NEXT_APP_DATA_DIR:-./next-app}/.next:/app/.next
     restart: unless-stopped
-    # ports:
-    #   - 3000:3000
+    ports:
+      - 3000:3000
     depends_on:
       mariadb:
         condition: service_healthy
     networks:
-      - ${COMPOSE_PROJECT_NAME}_network
+      - next_app_network
 
   # Database
   mariadb:
@@ -41,12 +42,12 @@ services:
       timeout: 5s
       retries: 6
     networks:
-      - ${COMPOSE_PROJECT_NAME}_network
+      - next_app_network
 
   # Nginx webserver
   webserver:
     depends_on:
-      - NEXT_APP
+      - next_app
     image: nginx:${NGINX_VERSION:-latest}
     container_name: ${COMPOSE_PROJECT_NAME}_webserver
     restart: unless-stopped
@@ -57,9 +58,8 @@ services:
     volumes:
       - ${NEXT_APP_DATA_DIR:-./next-app}:/var/www/html
       - ./nginx-conf:/etc/nginx/conf.d
-      - certbot-etc:/etc/letsencrypt
     networks:
-      - ${COMPOSE_PROJECT_NAME}_network
+      - next_app_network
 
 # Volumes
 volumes:
@@ -67,5 +67,6 @@ volumes:
 
 # Networks
 networks:
-  ${COMPOSE_PROJECT_NAME}_network:
+  next_app_network:
     driver: bridge
+    name: "${COMPOSE_PROJECT_NAME}_network"
