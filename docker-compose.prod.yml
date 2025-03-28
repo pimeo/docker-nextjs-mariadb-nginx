@@ -1,0 +1,64 @@
+services:
+  NEXT_APP:
+    container_name: ${COMPOSE_PROJECT_NAME}_next_app
+    build:
+      context: ./next-app
+      dockerfile: prod.dockerfile
+      args:
+        ENV_VARIABLE: ${ENV_VARIABLE}
+        NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    networks:
+      - ${COMPOSE_PROJECT_NAME}_network
+  
+  # Database
+  mariadb:
+    container_name: ${COMPOSE_PROJECT_NAME}_mariadb
+    image: docker.io/bitnami/mariadb:${MARIADB_VERSION:-latest}
+    hostname: mariadb
+    restart: unless-stopped
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+    env_file: .env
+    healthcheck:
+      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+      interval: 15s
+      timeout: 5s
+      retries: 6
+    networks:
+      - ${COMPOSE_PROJECT_NAME}_network
+
+  # Nginx webserver
+  webserver:
+    depends_on:
+      - NEXT_APP
+    image: nginx:${NGINX_VERSION:-latest}
+    container_name: ${COMPOSE_PROJECT_NAME}_webserver
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # - "wordpress:/var/www/html"
+      - ${WORDPRESS_DATA_DIR:-./wordpress}:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+      - certbot-etc:/etc/letsencrypt
+    networks:
+      - ${COMPOSE_PROJECT_NAME}_network
+
+# Volumes
+volumes:
+  mariadb_data:
+
+# Networks
+networks:
+  ${COMPOSE_PROJECT_NAME}_network:
+    driver: bridge

@@ -1,0 +1,71 @@
+services:
+  # NextJS application
+  NEXT_APP:
+    container_name: ${COMPOSE_PROJECT_NAME}_next_app
+    build:
+      context: ./next-app
+      dockerfile: dev.dockerfile
+    environment:
+      NEXT_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
+      NEXT_PUBLIC_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
+      NEXT_APP_HOST_HTTP_PORT: ${NEXT_APP_HOST_HTTP_PORT}
+      NEXT_APP_HOST_HTTPS_PORT: ${NEXT_APP_HOST_HTTPS_PORT}
+    env_file:
+      - .env
+    volumes:
+      - ${NEXT_APP_DATA_DIR:-./next-app}/src:/app/src
+      - ${NEXT_APP_DATA_DIR:-./next-app}/public:/app/public
+    restart: unless-stopped
+    # ports:
+    #   - 3000:3000
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - ${COMPOSE_PROJECT_NAME}_network
+
+  # Database
+  mariadb:
+    container_name: ${COMPOSE_PROJECT_NAME}_mariadb
+    image: docker.io/bitnami/mariadb:${MARIADB_VERSION:-latest}
+    hostname: mariadb
+    restart: unless-stopped
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+    env_file: .env
+    healthcheck:
+      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+      interval: 15s
+      timeout: 5s
+      retries: 6
+    networks:
+      - ${COMPOSE_PROJECT_NAME}_network
+
+  # Nginx webserver
+  webserver:
+    depends_on:
+      - NEXT_APP
+    image: nginx:${NGINX_VERSION:-latest}
+    container_name: ${COMPOSE_PROJECT_NAME}_webserver
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${NEXT_APP_DATA_DIR:-./next-app}:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+      - certbot-etc:/etc/letsencrypt
+    networks:
+      - ${COMPOSE_PROJECT_NAME}_network
+
+# Volumes
+volumes:
+  mariadb_data:
+
+# Networks
+networks:
+  ${COMPOSE_PROJECT_NAME}_network:
+    driver: bridge
