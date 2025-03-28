@@ -22,17 +22,25 @@ RUN \
 COPY src ./src
 COPY public ./public
 COPY next.config.ts .
+COPY drizzle.config.ts .
+COPY postcss.config.mjs .
+COPY eslint.config.mjs .
 COPY tsconfig.json .
 
 # Environment variables must be present at build time
 # https://github.com/vercel/next.js/discussions/14030
-ARG ENV_VARIABLE
-ENV ENV_VARIABLE=${ENV_VARIABLE}
-ARG NEXT_PUBLIC_ENV_VARIABLE
-ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
+ARG NEXT_APP_HOST_DOMAIN
+ENV NEXT_APP_HOST_DOMAIN=${NEXT_APP_HOST_DOMAIN}
+ARG NEXT_PUBLIC_APP_HOST_DOMAIN
+ENV NEXT_PUBLIC_APP_HOST_DOMAIN=${NEXT_PUBLIC_APP_HOST_DOMAIN}
+
+ARG NEXT_APP_HOST_HTTP_PORT
+ENV NEXT_APP_HOST_HTTP_PORT=${NEXT_APP_HOST_HTTP_PORT}
+ARG NEXT_APP_HOST_HTTPS_PORT
+ENV NEXT_APP_HOST_HTTPS_PORT=${NEXT_APP_HOST_HTTPS_PORT}
 
 # Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line to disable telemetry at build time
+# Uncomment the following line to disable telemetry at run time
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Build Next.js based on the preferred package manager
@@ -63,13 +71,19 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Environment variables must be redefined at run time
-ARG ENV_VARIABLE
-ENV ENV_VARIABLE=${ENV_VARIABLE}
-ARG NEXT_PUBLIC_ENV_VARIABLE
-ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
+ARG NEXT_APP_HOST_DOMAIN
+ENV NEXT_APP_HOST_DOMAIN=${NEXT_APP_HOST_DOMAIN}
+ARG NEXT_PUBLIC_APP_HOST_DOMAIN
+ENV NEXT_PUBLIC_APP_HOST_DOMAIN=${NEXT_PUBLIC_APP_HOST_DOMAIN}
 
+ARG NEXT_APP_HOST_HTTP_PORT
+ENV NEXT_APP_HOST_HTTP_PORT=${NEXT_APP_HOST_HTTP_PORT}
+ARG NEXT_APP_HOST_HTTPS_PORT
+ENV NEXT_APP_HOST_HTTPS_PORT=${NEXT_APP_HOST_HTTPS_PORT}
+
+# Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line to disable telemetry at run time
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
 
 # Note: Don't expose ports here, Compose will handle that for us
 
