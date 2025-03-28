@@ -17,7 +17,8 @@ RUN \
 
 COPY src ./src
 COPY public ./public
-COPY next.config.ts .
+# COPY next.config.ts .
+COPY next.config.js .
 COPY drizzle.config.ts .
 COPY postcss.config.mjs .
 COPY eslint.config.mjs .
