@@ -37,3 +37,6 @@ next-env.d.ts
 # sqlite databases
 databases/
 !databases/.gitkeep
+
+# nginx active configurations
+nginx-conf/nginx.conf
