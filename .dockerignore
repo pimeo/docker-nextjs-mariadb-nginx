@@ -1,6 +1,10 @@
 Dockerfile
 .dockerignore
 npm-debug.log
+pnpm-debug.log
 README.md
 .git
 orbit.yml
+.editorconfig
+.tool-versions
+makefile
