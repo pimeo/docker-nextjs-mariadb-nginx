@@ -49,6 +49,14 @@ server {
         # add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
         # enable strict transport security only if you understand the implications
 
+        # Serve static files directly via nginx. Lets us to reduce traffic from upstream and use the default server cache enigne.
+        location ^~ /_next {
+                alias /var/www/html/.next/;
+                expires 365d;
+                add_header Cache-Control 'public';
+                access_log off;
+        }
+
         location / {
                 proxy_pass http://app;
                 
@@ -65,22 +73,19 @@ server {
                 proxy_set_header Host $host;
         }
 
-        location /_next/ {
-                alias /var/www/html/.next/;
-                expires 30d;
-                access_log on;
-        }
-
         location ~ /\.ht {
                 deny all;
         }
 
         location = /favicon.ico {
-                log_not_found off; access_log off;
+                log_not_found off; 
+                access_log off;
         }
 
         location = /robots.txt {
-                log_not_found off; access_log off; allow all;
+                log_not_found off; 
+                access_log off; 
+                allow all;
         }
 
         location ~* \.(css|gif|ico|jpeg|jpg|js|png)$ {
