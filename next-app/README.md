@@ -1,6 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+- [Alpcloud docker nextjs template](#alpcloud-docker-nextjs-template)
+  - [Requirements](#requirements)
+    - [PNPM](#pnpm)
+    - [Installation](#installation)
+    - [Update](#update)
+  - [Getting Started](#getting-started)
+    - [Pre-installed packages:](#pre-installed-packages)
+  - [Start docker compose services](#start-docker-compose-services)
+      - [Development server](#development-server)
+      - [Production server](#production-server)
+    - [How to start project locally](#how-to-start-project-locally)
+  - [Learn More](#learn-more)
+
+
+# Alpcloud docker nextjs template
+
+- Created by: bsu
+- Created at: 03/27/25
+- Version: 0.1.0
+
+## Requirements
+
+- NodeJS >=20.11.1
+- PNPM >=10
+- NextJS >=15
+- Docker >=28.0
+- Make
+
+### PNPM 
+
+PNPM is an alternative to NPM. It's a more robust and fast node package manager. With its help we can reduce the compilation time.
+
+### Installation
+
+```
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+### Update
+
+```sh
+pnpm add -g pnpm
+```
 
 ## Getting Started
+
+```sh
+mkdir my-next-app && cd my-next-app
+git clone https://gitlab.sixbleuets.ovh/paas-alpcloud/alpcloud-docker-nextjs.git .
+make install_template
+```
+
+**Note: You can now create a gitlab repository and link it remotely.**
+
+```sh
+git remote add origin `<YOUR_REPOSITORY_REMOTE_URL>`
+git push origin --all
+```
+
+### Pre-installed packages:
+- [TypeScript](https://www.typescriptlang.org/docs/) - TypeScript is JavaScript with syntax for types.
+- [TailwindCSS](https://tailwindcss.com/docs) - A utility-first CSS framework packed with classes that can be composed to build any design, directly in your markup.
+- [Drizzle ORM](https://orm.drizzle.team/docs) - Drizzle ORM is a headless TypeScript ORM with a head
+- [Zod](https://zod.dev/) - TypeScript-first schema validation with static type inference
+
+## Start docker compose services
+
+#### Development server
+
+```sh
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Access to the project via `http://localhost:3000` (application) or `http://localhost` (nginx proxy pass server)
+
+You can edit the codebase and will see the results without refreshing.
+
+#### Production server
+
+```sh
+docker compose down ## Required because we need to destroy entierely services
+docker compose -f docker-compose.prod.yml up --build --no-cache
+```
+
+Access to the project via `http://localhost` (nginx proxy pass server)
+
+### How to start project locally
 
 First, run the development server:
 
@@ -9,7 +94,7 @@ npm run dev
 # or
 yarn dev
 # or
-pnpm dev
+pnpm dev # preferred
 # or
 bun dev
 ```
@@ -28,9 +113,3 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
