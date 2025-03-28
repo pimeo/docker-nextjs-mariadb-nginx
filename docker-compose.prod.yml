@@ -11,7 +11,7 @@ services:
       NEXT_APP_HOST_HTTP_PORT: ${NEXT_APP_HOST_HTTP_PORT}
       NEXT_APP_HOST_HTTPS_PORT: ${NEXT_APP_HOST_HTTPS_PORT}
     volumes:
-      - 'next_app_data:/app'
+      - next_app_data:/app
     env_file:
       - .env
     restart: always
