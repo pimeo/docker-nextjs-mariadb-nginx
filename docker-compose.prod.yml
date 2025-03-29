@@ -5,15 +5,15 @@ services:
     build:
       context: ./next-app
       dockerfile: docker/prod.dockerfile
-    environment:
-      NEXT_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
-      NEXT_PUBLIC_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
-      NEXT_APP_HOST_HTTP_PORT: ${NEXT_APP_HOST_HTTP_PORT}
-      NEXT_APP_HOST_HTTPS_PORT: ${NEXT_APP_HOST_HTTPS_PORT}
+      args:
+        # prefixed "NEXT_PUBLIC" give read access to nodejs and browser
+        NEXT_PUBLIC_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
+        NEXT_PUBLIC_APP_EXTERNAL_URL: ${NEXT_APP_EXTERNAL_URL}
+        # other variables give access to nodejs only
+        NEXT_APP_HOST_HTTP_PORT: ${NEXT_APP_HOST_HTTP_PORT}
+        NEXT_APP_HOST_HTTPS_PORT: ${NEXT_APP_HOST_HTTPS_PORT}
     volumes:
       - next_app_data:/app
-    env_file:
-      - .env
     restart: always
     ports:
       - 3000:3000
@@ -33,7 +33,6 @@ services:
       - 'mariadb_data:/bitnami/mariadb'
     environment:
       - ALLOW_EMPTY_PASSWORD=no
-    env_file: .env
     healthcheck:
       test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
       interval: 15s
@@ -49,7 +48,6 @@ services:
     image: nginx:${NGINX_VERSION:-latest}
     container_name: ${COMPOSE_PROJECT_NAME}_webserver
     restart: always
-    env_file: .env
     ports:
       - "80:80"
       - "443:443"

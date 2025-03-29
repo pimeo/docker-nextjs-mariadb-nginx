@@ -2,16 +2,17 @@ services:
   # NextJS application
   next_app:
     container_name: ${COMPOSE_PROJECT_NAME}_next_app
+    env_file: .env.development
     build:
       context: ./next-app
       dockerfile: docker/dev.dockerfile
-    environment:
-      NEXT_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
-      NEXT_PUBLIC_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
-      NEXT_APP_HOST_HTTP_PORT: ${NEXT_APP_HOST_HTTP_PORT}
-      NEXT_APP_HOST_HTTPS_PORT: ${NEXT_APP_HOST_HTTPS_PORT}
-    env_file:
-      - .env
+      args:
+        # prefixed "NEXT_PUBLIC" give read access to nodejs and browser
+        NEXT_PUBLIC_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
+        NEXT_PUBLIC_APP_EXTERNAL_URL: ${NEXT_APP_EXTERNAL_URL}
+        # other variables give access to nodejs only
+        NEXT_APP_HOST_HTTP_PORT: ${NEXT_APP_HOST_HTTP_PORT}
+        NEXT_APP_HOST_HTTPS_PORT: ${NEXT_APP_HOST_HTTPS_PORT}
     volumes:
       - ${NEXT_APP_DATA_DIR:-./next-app}/src:/app/src
       - ${NEXT_APP_DATA_DIR:-./next-app}/public:/app/public
