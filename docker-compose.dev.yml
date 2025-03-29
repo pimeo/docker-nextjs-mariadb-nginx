@@ -4,7 +4,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}_next_app
     build:
       context: ./next-app
-      dockerfile: dev.dockerfile
+      dockerfile: docker/dev.dockerfile
     environment:
       NEXT_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
       NEXT_PUBLIC_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
