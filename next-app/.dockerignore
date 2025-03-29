@@ -1,6 +1,4 @@
-dev.dockerfile
-prod.dockerfile
-prod-without-multistage.dockerfile
+docker
 .dockerignore
 npm-debug.log
 pnpm-debug.log
