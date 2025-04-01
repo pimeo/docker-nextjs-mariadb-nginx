@@ -1,5 +1,6 @@
 
-- [Alpcloud docker nextjs template](#alpcloud-docker-nextjs-template)
+- [Docker with nginx template](#docker-with-nginx-template)
+  - [Inspirations](#inspirations)
   - [Requirements](#requirements)
     - [PNPM](#pnpm)
     - [Installation](#installation)
@@ -18,11 +19,16 @@
   - [Clean docker development environment](#clean-docker-development-environment)
 
 
-# Alpcloud docker nextjs template
+# Docker with nginx template
 
 - Created by: bsu
 - Created at: 03/27/25
 - Version: 0.1.0
+
+The goal of this repository is to have a full sample of a working docker build process with NextJS and Mariadb and Nginx.
+
+## Inspirations
+- [NextJS Example with docker compose](https://github.com/vercel/next.js/tree/canary/examples/with-docker-compose)
 
 ## Requirements
 
@@ -52,7 +58,7 @@ pnpm add -g pnpm
 
 ```sh
 mkdir my-next-app && cd my-next-app
-git clone https://gitlab.sixbleuets.ovh/paas-alpcloud/alpcloud-docker-nextjs.git .
+git clone https://github.com/pimeo/docker-nextjs-mariadb-nginx.git .
 make install_template
 ```
 
