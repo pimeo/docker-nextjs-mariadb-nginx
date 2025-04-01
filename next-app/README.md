@@ -11,6 +11,11 @@
   - [Deployment](#deployment)
   - [How to start develop locally](#how-to-start-develop-locally)
   - [Learn More](#learn-more)
+  - [Alternative: use nginx without docker](#alternative-use-nginx-without-docker)
+    - [Install Nginx](#install-nginx)
+    - [Install certbot](#install-certbot)
+  - [Docker bake](#docker-bake)
+  - [Clean docker development environment](#clean-docker-development-environment)
 
 
 # Alpcloud docker nextjs template
@@ -81,11 +86,18 @@ You can edit the codebase and will see the results without refreshing.
 ```sh
 docker compose down ## Required because we need to destroy entirely services
 # docker compose -f docker-compose.prod.yml up --build
-docker compose -f docker-compose.prod.yml build --no-cache
+docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml up -d
 ```
 
+It's recommended to not use the `--no-cache` argument when building the docker images. It forces the webserver target to fetch and rebuilt once again the next application sources before copy to the `/var/www/html`. Consequently, the BUILD_ID from the app image will be different from the webserver image.
+
 Access to the project via `http://localhost` (nginx proxy pass server)
+
+```sh
+docker compose -f docker-compose.prod.yml build next_app
+docker compose -f docker-compose.prod.yml up --no-deps -d next_app
+```
 
 ## How to start develop locally
 
@@ -115,3 +127,110 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+
+## Alternative: use nginx without docker
+
+### Install Nginx 
+
+```sh
+sudo apt update
+sudo apt nginx
+
+git clone <your_app_repository_url> <your_app_directory>
+cd your_app_directory
+pnpm install
+pnpm run build
+ppm install -g pm2
+pm2 start npm --name "your-app-name" --interpreter bash -- start
+pm2 show your-app-name
+
+sudo nano /etc/nginx/sites-available/your-app-name.com
+
+# server {
+#     listen 80;
+#     server_name your-domain-name.com www.your-domain-name.com;
+#     location / {
+#         proxy_pass http://localhost:3000;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#     }
+
+#     # Serve any static assets with NGINX
+#     location /_next/static {
+#         alias /home/ubuntu/PROJECT_FOLDER/.next/static;
+#         add_header Cache-Control "public, max-age=3600, immutable";
+#     }
+# }
+
+sudo ln -s /etc/nginx/sites-available/your-app-name.com /etc/nginx/sites-enabled/ 
+sudo systemctl restart nginx
+```
+
+### Install certbot
+
+```sh
+sudo apt-get update
+sudo apt-get install certbot python3-certbot-nginx
+sudo certbot --nginx -d your-domain-name.com -d www.your-domain-name.com
+
+sudo nano /etc/nginx/sites-available/your-app-name.com 
+
+# server {
+#     listen 80;
+#     server_name your-domain-name.com www.your-domain-name.com;
+#     return 301 https://$host$request_uri;
+# }
+
+# server {
+#     listen 443 ssl;
+#     server_name your-domain-name.com www.your-domain-name.com;
+
+#     ssl_certificate /etc/letsencrypt/live/your-domain-name.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/your-domain-name.com/privkey.pem;
+
+#     location / {
+#         proxy_pass http://localhost:3000;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#     }
+#     location /_next/static/ {
+#         alias /var/www/your-nextjs-app/out/_next/static/;
+#         expires 1y;
+#         access_log off;
+#     }
+
+#     location /static/ {
+#         alias /var/www/your-nextjs-app/out/static/;
+#         expires 1y;
+#         access_log off;
+#     }
+# }
+
+sudo systemctl restart nginx 
+git pull
+npm run build
+pm2 restart your-app-name
+```
+
+
+## Docker bake
+- [docker buildx build](https://docs.docker.com/reference/cli/docker/buildx/build/)
+
+```sh
+# Show configurations
+docker buildx bake --file docker-bake.prod.hcl --file .env --print
+
+# Build images
+docker buildx bake --print --file docker-bake.prod.hcl --file .env
+```
+
+## Clean docker development environment
+
+```sh
+docker image ls
+docker image prune
+docker image rm my_next_app-webserver
+docker image rm my_next_app-next_app
+docker compose -f docker-compose.prod.yml build --no-cache
+```
