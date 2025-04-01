@@ -222,7 +222,7 @@ pm2 restart your-app-name
 docker buildx bake --file docker-bake.prod.hcl --file .env --print
 
 # Build images
-docker buildx bake --print --file docker-bake.prod.hcl --file .env
+docker buildx bake --file docker-bake.prod.hcl --file .env
 ```
 
 ## Clean docker development environment
