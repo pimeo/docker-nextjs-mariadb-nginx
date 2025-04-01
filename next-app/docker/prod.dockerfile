@@ -1,6 +1,8 @@
 # syntax=docker.io/docker/dockerfile:1
 
-ARG NODE_VERSION=20-alpine
+ARG NODE_VERSION="20-alpine"
+ARG NGINX_VERSION="1.27.4-alpine"
+
 FROM node:${NODE_VERSION} AS base
 
 # Step 1. Rebuild the source code only when needed
@@ -57,7 +59,7 @@ RUN \
 # Note: It is not necessary to add an intermediate step that does a full copy of `node_modules` here
 
 # Step 2. Production image, copy all the files and run next
-FROM base AS runner
+FROM builder AS runner
 
 WORKDIR /app
 
@@ -85,6 +87,9 @@ ENV NEXT_APP_HOST_HTTP_PORT=${NEXT_APP_HOST_HTTP_PORT}
 ARG NEXT_APP_HOST_HTTPS_PORT
 ENV NEXT_APP_HOST_HTTPS_PORT=${NEXT_APP_HOST_HTTPS_PORT}
 
+ARG HOSTNAME="0.0.0.0"
+ENV HOSTNAME=${HOSTNAME}
+
 # Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line to disable telemetry at run time
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -92,3 +97,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 # Note: Don't expose ports here, Compose will handle that for us
 
 CMD ["node", "server.js"]
+
+FROM nginx:${NGINX_VERSION} AS webserver
+COPY --from=runner /app /var/www/html
+COPY ./nginx-conf/nginx.conf /etc/nginx/conf.d/default.conf

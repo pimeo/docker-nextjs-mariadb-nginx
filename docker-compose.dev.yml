@@ -2,11 +2,12 @@ services:
   # NextJS application
   next_app:
     container_name: ${COMPOSE_PROJECT_NAME}_next_app
-    env_file: .env.development
+    env_file: .env
     build:
       context: ./next-app
       dockerfile: docker/dev.dockerfile
       args:
+        NODE_VERSION: ${NODE_VERSION}
         # prefixed "NEXT_PUBLIC" give read access to nodejs and browser
         NEXT_PUBLIC_APP_HOST_DOMAIN: ${NEXT_APP_HOST_DOMAIN}
         NEXT_PUBLIC_APP_EXTERNAL_URL: ${NEXT_APP_EXTERNAL_URL}
@@ -35,8 +36,12 @@ services:
     volumes:
       - 'mariadb_data:/bitnami/mariadb'
     environment:
-      - ALLOW_EMPTY_PASSWORD=no
-    env_file: .env
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_PORT: ${MARIADB_PORT:-3306}
+      ALLOW_EMPTY_PASSWORD: no
     healthcheck:
       test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
       interval: 15s
@@ -52,13 +57,12 @@ services:
     image: nginx:${NGINX_VERSION:-latest}
     container_name: ${COMPOSE_PROJECT_NAME}_webserver
     restart: unless-stopped
-    env_file: .env
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ${NEXT_APP_DATA_DIR:-./next-app}:/var/www/html
-      - ./nginx-conf:/etc/nginx/conf.d
+      - ./next-app/nginx-conf:/etc/nginx/conf.d
     networks:
       - next_app_network
 

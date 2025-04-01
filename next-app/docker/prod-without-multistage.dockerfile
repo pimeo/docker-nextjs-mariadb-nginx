@@ -1,7 +1,11 @@
 # syntax=docker.io/docker/dockerfile:1
 
-ARG NODE_VERSION=20-alpine
-FROM node:${NODE_VERSION}
+# syntax=docker.io/docker/dockerfile:1
+
+ARG NODE_VERSION="20-alpine"
+ARG NGINX_VERSION="1.27.4-alpine"
+
+FROM node:${NODE_VERSION} as next_app
 
 WORKDIR /app
 
@@ -40,6 +44,9 @@ ENV NEXT_APP_HOST_HTTP_PORT=${NEXT_APP_HOST_HTTP_PORT}
 ARG NEXT_APP_HOST_HTTPS_PORT
 ENV NEXT_APP_HOST_HTTPS_PORT=${NEXT_APP_HOST_HTTPS_PORT}
 
+ARG HOSTNAME="0.0.0.0"
+ENV HOSTNAME=${HOSTNAME}
+
 # Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line to disable telemetry at run time
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -61,3 +68,9 @@ CMD \
   elif [ -f pnpm-lock.yaml ]; then pnpm start; \
   else npm run start; \
   fi
+
+
+FROM nginx:${NGINX_VERSION} AS webserver
+COPY --from=next_app /app/.next/standalone /var/www/html
+COPY --from=next_app /app/.next/static /var/www/html/.next/static
+COPY ./nginx-conf/nginx.conf /etc/nginx/conf.d/default.conf
